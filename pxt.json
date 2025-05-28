@@ -1,0 +1,56 @@
+{
+    "name": "Tempest Tower",
+    "description": "",
+    "dependencies": {
+        "device": "*",
+        "Timers": "github:microsoft/arcade-timers#v1.1.0",
+        "browser-events": "*",
+        "arcade-background-scroll": "github:microsoft/arcade-background-scroll#v0.1.2",
+        "arcade-sprite-data": "github:microsoft/arcade-sprite-data#v0.2.1",
+        "Color Fading": "github:jwunderl/pxt-color#v0.2.3",
+        "arcade-text": "github:microsoft/arcade-text#v1.3.0"
+    },
+    "files": [
+        "main.blocks",
+        "main.ts",
+        "README.md",
+        "assets.json",
+        "tilemap.g.jres",
+        "tilemap.g.ts",
+        "images.g.jres",
+        "images.g.ts"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "targetVersions": {
+        "branch": "v2.0.56",
+        "tag": "v2.0.56",
+        "commits": "https://github.com/microsoft/pxt-arcade/commits/2e47d3464cf6ea715ec6e630834bbe15bc2f6feb",
+        "target": "2.0.56",
+        "pxt": "11.3.59",
+        "targetId": "arcade"
+    },
+    "supportedTargets": [
+        "arcade"
+    ],
+    "preferredEditor": "blocksprj",
+    "palette": [
+        "#000000",
+        "#E6E6E6",
+        "#B81414",
+        "#B06989",
+        "#B45A22",
+        "#AD8800",
+        "#14595D",
+        "#348D54",
+        "#002B75",
+        "#4C8890",
+        "#A1794F",
+        "#60471F",
+        "#5C406c",
+        "#755388",
+        "#3B2A47",
+        "#000000"
+    ]
+}
