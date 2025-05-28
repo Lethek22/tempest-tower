@@ -291,8 +291,10 @@ sprites.onOverlap(SpriteKind.Camman, SpriteKind.Door, function (sprite, otherSpr
                                 tiles.setCurrentTilemap(tilemap`TowerA3`)
                             } else if (ListStorage[1] == 4) {
                                 tiles.setCurrentTilemap(tilemap`TowerA4`)
-                            } else if (ListStorage[1] == 2) {
+                            } else if (ListStorage[1] == 6) {
                                 tiles.setCurrentTilemap(tilemap`TowerA5`)
+                            } else if (ListStorage[1] == 2) {
+                                tiles.setCurrentTilemap(tilemap`TowerA6`)
                             } else {
                             	
                             }
