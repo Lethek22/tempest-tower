@@ -201,6 +201,9 @@ function XChamberNum () {
     Flood.vy = -6
     tiles.placeOnTile(Flood, tiles.getTileLocation(0, mySprite.tilemapLocation().row + 15))
 }
+controller.player2.onButtonEvent(ControllerButton.A, ControllerButtonEvent.Pressed, function () {
+    tiles.placeOnRandomTile(CameraSpr, assets.tile`BackBrick7`)
+})
 function WeaponHoldImgs (Imgs: any[], Input: string, Subject: Sprite, SubjectB: Sprite) {
     for (let index = 0; index <= Imgs.length - 1; index++) {
         if (sprites.readDataNumber(SubjectB, Input) == index + 1) {
@@ -281,25 +284,26 @@ sprites.onOverlap(SpriteKind.Camman, SpriteKind.Door, function (sprite, otherSpr
                                 sprites.setDataNumber(mySprite, "HP", 100)
                             }
                             ListStorage[0] = 0
-                            ListStorage[1] = ListStorage[1] + 1
                             for (let index = 0; index <= 4; index++) {
                                 ListStorage[3 + index] = 0
                             }
-                            if (ListStorage[1] == 5) {
+                            ListStorage[10] = ListMod[ListStorage[1] - 1]
+                            if (ListStorage[10] == 2) {
                                 tiles.setCurrentTilemap(tilemap`TowerA2`)
-                            } else if (ListStorage[1] == 3) {
+                            } else if (ListStorage[10] == 3) {
                                 tiles.setCurrentTilemap(tilemap`TowerA3`)
-                            } else if (ListStorage[1] == 4) {
+                            } else if (ListStorage[10] == 4) {
                                 tiles.setCurrentTilemap(tilemap`TowerA4`)
-                            } else if (ListStorage[1] == 6) {
+                            } else if (ListStorage[10] == 5) {
                                 tiles.setCurrentTilemap(tilemap`TowerA5`)
-                            } else if (ListStorage[1] == 7) {
+                            } else if (ListStorage[10] == 6) {
                                 tiles.setCurrentTilemap(tilemap`TowerA6`)
-                            } else if (ListStorage[1] == 2) {
+                            } else if (ListStorage[10] == 7) {
                                 tiles.setCurrentTilemap(tilemap`TowerA7`)
                             } else {
                             	
                             }
+                            ListStorage[1] = ListStorage[1] + 1
                             EnemySpawn()
                             XChamberNum()
                             tiles.placeOnRandomTile(CameraSpr, assets.tile`BackBrick0`)
@@ -843,6 +847,7 @@ let Flood: Sprite = null
 let Decoration: Sprite = null
 let Enemy1: Sprite = null
 let Attack: Sprite = null
+let ListMod: number[] = []
 let ListStorage: number[] = []
 let Weapon: Sprite = null
 let Cursor: Sprite = null
@@ -914,6 +919,8 @@ assets.image`Weapon16`
 // 6: Accuracy[P]
 // 7: Accuracy[H]
 // 8: EnemiesLeft
+// 9: StoredRando
+// 10: Simplif
 ListStorage = [
 0,
 1,
@@ -923,9 +930,34 @@ ListStorage = [
 0,
 0,
 0,
+0,
+1,
 0
 ]
 EnemySpawn()
+ListMod = [
+0,
+0,
+0,
+0,
+-13
+]
+for (let index = 0; index <= ListMod.length - 2; index++) {
+    while (ListMod[ListMod.length - 1] == -13) {
+        ListStorage[9] = randint(2, 7)
+        for (let value of ListMod) {
+            if (ListStorage[9] == value) {
+                break;
+            }
+            if (value == -13) {
+                ListMod[index] = ListStorage[9]
+                ListMod[ListMod.length - 1] = -12
+            }
+        }
+    }
+    ListMod[ListMod.length - 1] = -13
+}
+ListMod[ListMod.length - 1] = randint(-3, -1)
 game.onUpdateInterval(1000, function () {
     if (ListStorage[0] == 0) {
         ListStorage[5] = ListStorage[5] + 1
