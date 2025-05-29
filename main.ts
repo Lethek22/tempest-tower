@@ -261,13 +261,33 @@ sprites.onOverlap(SpriteKind.Camman, SpriteKind.Door, function (sprite, otherSpr
                 timer.after(1000, function () {
                     Module.ay = 0
                     Module.vy = 0
-                    Module = sprites.create(assets.image`Module2`, SpriteKind.Decor)
-                    animation.runImageAnimation(
-                    Module,
-                    assets.animation`ModAscend`,
-                    100,
-                    false
-                    )
+                    if (ListMod[ListStorage[1] - 1] >= 0) {
+                        Module = sprites.create(assets.image`Module2`, SpriteKind.Decor)
+                        animation.runImageAnimation(
+                        Module,
+                        assets.animation`ModAscend`,
+                        100,
+                        false
+                        )
+                    } else {
+                        Module = sprites.create(assets.image`Peak`, SpriteKind.Decor)
+                        animation.runImageAnimation(
+                        Module,
+                        assets.animation`PeakAscend`,
+                        100,
+                        false
+                        )
+                        if (ListMod[ListStorage[1] - 1] >= -1) {
+                            color.setColor(4, color.rgb(128, 0, 0))
+                            Module = sprites.create(assets.image`RedC`, SpriteKind.Decor)
+                            animation.runImageAnimation(
+                            Module,
+                            assets.animation`RedCFlame`,
+                            100,
+                            false
+                            )
+                        }
+                    }
                     Epilogue.top = 0
                     Epilogue.vy = 0
                     Epilogue.ay = 0
@@ -958,6 +978,7 @@ for (let index = 0; index <= ListMod.length - 2; index++) {
     ListMod[ListMod.length - 1] = -13
 }
 ListMod[ListMod.length - 1] = randint(-3, -1)
+ListMod[0] = randint(-3, -1)
 game.onUpdateInterval(1000, function () {
     if (ListStorage[0] == 0) {
         ListStorage[5] = ListStorage[5] + 1
