@@ -277,12 +277,27 @@ sprites.onOverlap(SpriteKind.Camman, SpriteKind.Door, function (sprite, otherSpr
                         100,
                         false
                         )
-                        if (ListMod[ListStorage[1] - 1] >= -1) {
+                        Module = sprites.create(assets.image`RedC`, SpriteKind.Decor)
+                        if (ListMod[ListStorage[1] - 1] == -1) {
                             color.setColor(4, color.rgb(128, 0, 0))
-                            Module = sprites.create(assets.image`RedC`, SpriteKind.Decor)
                             animation.runImageAnimation(
                             Module,
                             assets.animation`RedCFlame`,
+                            100,
+                            false
+                            )
+                        } else if (ListMod[ListStorage[1] - 1] == -2) {
+                            animation.runImageAnimation(
+                            Module,
+                            assets.animation`GreenCShine`,
+                            100,
+                            false
+                            )
+                        } else if (ListMod[ListStorage[1] - 1] == -3) {
+                            color.setColor(6, color.rgb(0, 50, 196))
+                            animation.runImageAnimation(
+                            Module,
+                            assets.animation`BlueCWater`,
                             100,
                             false
                             )
