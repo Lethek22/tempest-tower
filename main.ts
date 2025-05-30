@@ -5,6 +5,7 @@ namespace SpriteKind {
     export const Door = SpriteKind.create()
     export const Deth = SpriteKind.create()
     export const Drop = SpriteKind.create()
+    export const DethProj = SpriteKind.create()
 }
 /**
  * WeaponInvis?
@@ -149,12 +150,16 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`BackBrick11`, function (sprit
         tiles.setTileAt(value, assets.tile`BackBrick12`)
         tiles.setWallAt(value, true)
     }
-    sprites.setDataBoolean(mySprite, "Mark", true)
-    Summoner(1, assets.tile`BackBrick14`, assets.tile`BackBrick1`)
-    Summoner(2, assets.tile`BackBrick13`, assets.tile`BackBrick3`)
-    timer.after(500, function () {
-        sprites.setDataBoolean(mySprite, "Mark", false)
-    })
+    if (ListMod[ListStorage[1] - 2] == -2) {
+    	
+    } else {
+        sprites.setDataBoolean(mySprite, "Mark", true)
+        Summoner(1, assets.tile`BackBrick14`, assets.tile`BackBrick1`)
+        Summoner(2, assets.tile`BackBrick13`, assets.tile`BackBrick3`)
+        timer.after(500, function () {
+            sprites.setDataBoolean(mySprite, "Mark", false)
+        })
+    }
 })
 function ProjTrackII (Projectile: Sprite, TargetX: number, TargetY: number, Speed: number) {
     Projectile.setVelocity((TargetX - Projectile.x) / Math.sqrt((TargetX - Projectile.x) ** 2 + (TargetY - Projectile.y) ** 2) * Speed, (TargetY - Projectile.y) / Math.sqrt((TargetX - Projectile.x) ** 2 + (TargetY - Projectile.y) ** 2) * Speed)
@@ -335,8 +340,20 @@ sprites.onOverlap(SpriteKind.Camman, SpriteKind.Door, function (sprite, otherSpr
                                 tiles.setCurrentTilemap(tilemap`TowerA6`)
                             } else if (ListStorage[10] == 7) {
                                 tiles.setCurrentTilemap(tilemap`TowerA7`)
-                            } else {
+                            }
+                            if (ListStorage[10] == -1) {
                             	
+                            } else if (ListStorage[10] == -2) {
+                                tiles.setCurrentTilemap(tilemap`TowerA-2`)
+                                sprites.setDataBoolean(mySprite, "Mark", true)
+                                timer.after(500, function () {
+                                    Flood.vy = -4
+                                })
+                            } else if (ListStorage[10] == -3) {
+                                tiles.setCurrentTilemap(tilemap`TowerA-3`)
+                                timer.after(500, function () {
+                                    Flood.vy = -32
+                                })
                             }
                             ListStorage[1] = ListStorage[1] + 1
                             EnemySpawn()
@@ -372,6 +389,11 @@ function THETA () {
 }
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     sprites.setDataNumber(mySprite, "FacingLeft?", 1)
+})
+scene.onOverlapTile(SpriteKind.Player, assets.tile`BackBrick15`, function (sprite, location) {
+    if (mySprite.vy > -80 && controller.up.isPressed()) {
+        mySprite.vy += -15
+    }
 })
 function Texter (Icon: Image, Ident: number, X: number, Y: number, Left: boolean) {
     if (Ident == 5) {
@@ -432,6 +454,21 @@ function Summoner (Ident: number, StartBlock: Image, EndBlock: Image) {
             animation.runImageAnimation(
             Enemy1,
             assets.animation`Enemy1-3Spawn`,
+            100,
+            false
+            )
+            tiles.placeOnTile(Enemy1, value)
+            tiles.setTileAt(value, EndBlock)
+        }
+    } else if (Ident == 4) {
+        for (let value of tiles.getTilesByType(StartBlock)) {
+            Enemy1 = sprites.create(assets.image`EnemyTest`, SpriteKind.Enemy)
+            Enemies(80, 60, 4, 10, Enemy1)
+            Enemy1.ay = 500
+            Enemy1.fx = 25
+            animation.runImageAnimation(
+            Enemy1,
+            assets.animation`Enemy4Spawn`,
             100,
             false
             )
@@ -510,14 +547,52 @@ scene.onHitWall(SpriteKind.Enemy, function (sprite, location) {
                     })
                 }
             }
+        } else if (sprites.readDataNumber(sprite, "Ident") == 4) {
+            if (sprites.readDataNumber(sprite, "Attacking") == 0) {
+                if (mySprite.x - sprite.x < 0) {
+                    animation.runImageAnimation(
+                    sprite,
+                    assets.animation`Enemy4L`,
+                    500,
+                    true
+                    )
+                } else {
+                    animation.runImageAnimation(
+                    sprite,
+                    assets.animation`Enemy4R`,
+                    500,
+                    true
+                    )
+                }
+                if (Math.abs(mySprite.x - sprite.x) <= 80 && Math.abs(mySprite.y - sprite.y) <= 24) {
+                    sprites.setDataNumber(sprite, "Attacking", 1)
+                    mySprite.sayText(":)", 100, false)
+                    if (mySprite.x - sprite.x < 0) {
+                        EnemProj = sprites.create(assets.image`ArrowL`, SpriteKind.DethProj)
+                    } else {
+                        EnemProj = sprites.create(assets.image`ArrowR`, SpriteKind.DethProj)
+                    }
+                    EnemProj.setPosition(sprite.x, sprite.y)
+                    EnemProj.setFlag(SpriteFlag.DestroyOnWall, true)
+                    ProjTrackII(EnemProj, mySprite.x, mySprite.y, 200)
+                    EnemProj.ay = 100
+                    EnemProj.vy += -20
+                    timer.after(1000, function () {
+                        sprites.setDataNumber(sprite, "Attacking", 0)
+                    })
+                }
+            }
+        } else {
+        	
         }
     } else {
         if (sprites.readDataBoolean(sprite, "Invincible?")) {
             sprites.setDataBoolean(sprite, "Invincible?", false)
+            timer.after(600, function () {
+                sprites.setDataBoolean(sprite, "Fatal?", true)
+            })
             if (sprites.readDataNumber(sprite, "Ident") == 1 || sprites.readDataNumber(sprite, "Ident") == 3) {
-                timer.after(600, function () {
-                    sprites.setDataBoolean(sprite, "Fatal?", true)
-                })
+            	
             }
         }
     }
@@ -834,9 +909,19 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
             if (sprites.readDataBoolean(otherSprite, "Mark")) {
                 ListStorage[8] = ListStorage[8] - 1
                 if (ListStorage[8] == 0) {
-                    for (let value of tiles.getTilesByType(assets.tile`BackBrick12`)) {
-                        tiles.setTileAt(value, assets.tile`BackBrick10`)
-                        tiles.setWallAt(value, false)
+                    if (ListMod[ListStorage[1] - 2] == -2) {
+                        sprites.setDataBoolean(mySprite, "Mark", true)
+                        Summoner(1, assets.tile`Brick3`, assets.tile`Brick3`)
+                        Summoner(2, assets.tile`BackBrick13`, assets.tile`BackBrick3`)
+                        Summoner(3, assets.tile`BackBrick14`, assets.tile`BackBrick14`)
+                        timer.after(500, function () {
+                            sprites.setDataBoolean(mySprite, "Mark", false)
+                        })
+                    } else {
+                        for (let value of tiles.getTilesByType(assets.tile`BackBrick12`)) {
+                            tiles.setTileAt(value, assets.tile`BackBrick10`)
+                            tiles.setWallAt(value, false)
+                        }
                     }
                 }
             }
@@ -847,6 +932,7 @@ function EnemySpawn () {
     Summoner(1, assets.tile`BackBrick6`, assets.tile`BackBrick1`)
     Summoner(2, assets.tile`myTile2`, assets.tile`BackBrick1`)
     Summoner(3, assets.tile`BackBrick9`, assets.tile`BackBrick1`)
+    Summoner(4, assets.tile`BackBrick19`, assets.tile`BackBrick1`)
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     if (!(sprites.readDataBoolean(mySprite, "Invincible?")) && sprites.readDataBoolean(otherSprite, "Fatal?")) {
@@ -875,6 +961,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSp
     }
 })
 let DroppedItem: Sprite = null
+let EnemProj: Sprite = null
 let textSprite: TextSprite = null
 let Module: Sprite = null
 let Epilogue: Sprite = null
@@ -993,7 +1080,7 @@ for (let index = 0; index <= ListMod.length - 2; index++) {
     ListMod[ListMod.length - 1] = -13
 }
 ListMod[ListMod.length - 1] = randint(-3, -1)
-ListMod[0] = randint(-3, -1)
+ListMod[0] = randint(-2, -2)
 game.onUpdateInterval(1000, function () {
     if (ListStorage[0] == 0) {
         ListStorage[5] = ListStorage[5] + 1
