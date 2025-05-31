@@ -564,19 +564,36 @@ scene.onHitWall(SpriteKind.Enemy, function (sprite, location) {
                     true
                     )
                 }
-                if (Math.abs(mySprite.x - sprite.x) <= 80 && Math.abs(mySprite.y - sprite.y) <= 24) {
+                if (Math.abs(mySprite.x - sprite.x) <= 64 && Math.abs(mySprite.y - sprite.y) <= 24 || sprites.readDataBoolean(sprite, "Alert?")) {
+                    sprites.setDataBoolean(sprite, "Alert?", false)
                     sprites.setDataNumber(sprite, "Attacking", 1)
-                    mySprite.sayText(":)", 100, false)
                     if (mySprite.x - sprite.x < 0) {
-                        EnemProj = sprites.create(assets.image`ArrowL`, SpriteKind.DethProj)
+                        animation.runImageAnimation(
+                        sprite,
+                        assets.animation`Enemy4AL`,
+                        100,
+                        false
+                        )
+                        timer.after(400, function () {
+                            if (sprites.readDataNumber(sprite, "HP") > 0) {
+                                EnemProj = sprites.create(assets.image`ArrowL`, SpriteKind.DethProj)
+                                EnemyProjectiles(sprite)
+                            }
+                        })
                     } else {
-                        EnemProj = sprites.create(assets.image`ArrowR`, SpriteKind.DethProj)
+                        animation.runImageAnimation(
+                        sprite,
+                        assets.animation`Enemy4AR`,
+                        100,
+                        false
+                        )
+                        timer.after(400, function () {
+                            if (sprites.readDataNumber(sprite, "HP") > 0) {
+                                EnemProj = sprites.create(assets.image`ArrowR`, SpriteKind.DethProj)
+                                EnemyProjectiles(sprite)
+                            }
+                        })
                     }
-                    EnemProj.setPosition(sprite.x, sprite.y)
-                    EnemProj.setFlag(SpriteFlag.DestroyOnWall, true)
-                    ProjTrackII(EnemProj, mySprite.x, mySprite.y, 200)
-                    EnemProj.ay = 100
-                    EnemProj.vy += -20
                     timer.after(1000, function () {
                         sprites.setDataNumber(sprite, "Attacking", 0)
                     })
@@ -599,6 +616,9 @@ scene.onHitWall(SpriteKind.Enemy, function (sprite, location) {
 })
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     sprites.setDataNumber(mySprite, "FacingLeft?", 0)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.DethProj, function (sprite, otherSprite) {
+    Hit(otherSprite)
 })
 function Death (Cause: string) {
     if (sprites.readDataNumber(mySprite, "HP") != 1000) {
@@ -657,6 +677,15 @@ browserEvents.onMouseMove(function (x, y) {
     sprites.setDataNumber(Cursor, "X", x)
     sprites.setDataNumber(Cursor, "Y", y)
 })
+function EnemyProjectiles (sprite: Sprite) {
+    EnemProj.setPosition(sprite.x, sprite.y)
+    EnemProj.setFlag(SpriteFlag.DestroyOnWall, true)
+    ProjTrackII(EnemProj, mySprite.x, mySprite.y, 200)
+    EnemProj.ay = 100
+    EnemProj.vy += -20
+    sprites.setDataBoolean(EnemProj, "Fatal?", true)
+    sprites.setDataNumber(EnemProj, "Damage", 12)
+}
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Deth, function (sprite, otherSprite) {
     while (mySprite.y > Flood.top) {
         sprites.changeDataNumberBy(mySprite, "HP", -1)
@@ -798,6 +827,32 @@ browserEvents.MouseLeft.onEvent(browserEvents.MouseButtonEvent.Pressed, function
         }
     }
 })
+function Hit (otherSprite: Sprite) {
+    if (!(sprites.readDataBoolean(mySprite, "Invincible?")) && sprites.readDataBoolean(otherSprite, "Fatal?")) {
+        sprites.setDataBoolean(mySprite, "Invincible?", true)
+        sprites.changeDataNumberBy(mySprite, "HP", sprites.readDataNumber(otherSprite, "Damage") * -1)
+        sprites.setDataBoolean(mySprite, "CanMove?", false)
+        if (otherSprite.x - mySprite.x < 0) {
+            mySprite.setVelocity(50, -150)
+        } else {
+            mySprite.setVelocity(-50, -150)
+        }
+        if (sprites.readDataNumber(mySprite, "HP") <= 0) {
+            if (Math.percentChance(98)) {
+                Death("Enemy")
+            } else {
+                Death("EnemyB")
+            }
+        } else {
+            timer.after(500, function () {
+                sprites.setDataBoolean(mySprite, "CanMove?", true)
+                timer.after(250, function () {
+                    sprites.setDataBoolean(mySprite, "Invincible?", false)
+                })
+            })
+        }
+    }
+}
 scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
     if (!(image.getDimension(sprite.image, image.Dimension.Width) == 7 && image.getDimension(sprite.image, image.Dimension.Height) == 3)) {
         sprites.destroy(sprite)
@@ -910,10 +965,14 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
                 ListStorage[8] = ListStorage[8] - 1
                 if (ListStorage[8] == 0) {
                     if (ListMod[ListStorage[1] - 2] == -2) {
+                        for (let value of tiles.getTilesByType(assets.tile`Wood0`)) {
+                            tiles.setTileAt(value, assets.tile`Wood`)
+                            tiles.setWallAt(value, true)
+                        }
                         sprites.setDataBoolean(mySprite, "Mark", true)
                         Summoner(1, assets.tile`Brick3`, assets.tile`Brick3`)
                         Summoner(2, assets.tile`BackBrick13`, assets.tile`BackBrick3`)
-                        Summoner(3, assets.tile`BackBrick14`, assets.tile`BackBrick14`)
+                        Summoner(4, assets.tile`BackBrick14`, assets.tile`BackBrick14`)
                         timer.after(500, function () {
                             sprites.setDataBoolean(mySprite, "Mark", false)
                         })
@@ -935,30 +994,7 @@ function EnemySpawn () {
     Summoner(4, assets.tile`BackBrick19`, assets.tile`BackBrick1`)
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
-    if (!(sprites.readDataBoolean(mySprite, "Invincible?")) && sprites.readDataBoolean(otherSprite, "Fatal?")) {
-        sprites.setDataBoolean(mySprite, "Invincible?", true)
-        sprites.changeDataNumberBy(mySprite, "HP", sprites.readDataNumber(otherSprite, "Damage") * -1)
-        sprites.setDataBoolean(mySprite, "CanMove?", false)
-        if (otherSprite.x - mySprite.x < 0) {
-            mySprite.setVelocity(50, -150)
-        } else {
-            mySprite.setVelocity(-50, -150)
-        }
-        if (sprites.readDataNumber(mySprite, "HP") <= 0) {
-            if (Math.percentChance(98)) {
-                Death("Enemy")
-            } else {
-                Death("EnemyB")
-            }
-        } else {
-            timer.after(500, function () {
-                sprites.setDataBoolean(mySprite, "CanMove?", true)
-                timer.after(250, function () {
-                    sprites.setDataBoolean(mySprite, "Invincible?", false)
-                })
-            })
-        }
-    }
+    Hit(otherSprite)
 })
 let DroppedItem: Sprite = null
 let EnemProj: Sprite = null
